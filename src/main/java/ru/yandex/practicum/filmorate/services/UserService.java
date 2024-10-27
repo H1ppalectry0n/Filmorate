@@ -2,45 +2,40 @@ package ru.yandex.practicum.filmorate.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.FilmOrUserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final InMemoryUserStorage userStorage;
-    private final Map<Integer, Set<Integer>> friendsList = new HashMap<>();
 
     public void addFriend(int userId, int friendId) {
         final User user = userStorage.getUserById(userId);
         final User friend = userStorage.getUserById(friendId);
 
         if (user == null || friend == null) {
-            throw new FilmOrUserNotFoundException("Пользователь не существует");
+            throw new UserNotFoundException("Пользователь не существует");
         }
 
         if (userId == friendId) {
-            throw new FilmOrUserNotFoundException("нельзя добавить в друзья самого себя");
+            throw new FilmNotFoundException("нельзя добавить в друзья самого себя");
         }
 
         // добавление идентификаторов для пользователя который подал заявку
-        Set<Integer> userFriends = friendsList.get(userId);
-        if (userFriends == null) {
-            userFriends = new HashSet<>();
-        }
+        Set<Integer> userFriends = user.getFriends();
         userFriends.add(friendId);
-        friendsList.put(userId, userFriends);
+        user.setFriends(userFriends);
 
         // добавление идентификаторов для другого пользователя
-        Set<Integer> otherFriends = friendsList.get(friendId);
-        if (otherFriends == null) {
-            otherFriends = new HashSet<>();
-        }
+        Set<Integer> otherFriends = friend.getFriends();
         otherFriends.add(userId);
-        friendsList.put(friendId, otherFriends);
+        friend.setFriends(otherFriends);
     }
 
     public void removeFriend(int userId, int friendId) {
@@ -48,37 +43,26 @@ public class UserService {
         final User friend = userStorage.getUserById(friendId);
 
         if (user == null || friend == null) {
-            throw new FilmOrUserNotFoundException("Пользователь не существует");
+            throw new UserNotFoundException("Пользователь не существует");
         }
 
-        Set<Integer> userFriends = friendsList.get(userId);
-        if (userFriends != null) {
-            userFriends.remove(friendId);
-        }
+        Set<Integer> userFriends = user.getFriends();
+        userFriends.remove(friendId);
 
-        Set<Integer> otherFriends = friendsList.get(friendId);
-        if (otherFriends != null) {
-            otherFriends.remove(userId);
-        }
-    }
-
-    public void removeAllFriends(int userId) {
-        // удаление пользователя из списка друзей
-        friendsList.remove(userId);
-
-        // удаление у других пользователей
-        for (Set<Integer> other : friendsList.values()) {
-            other.remove(userId);
-        }
+        Set<Integer> otherFriends = friend.getFriends();
+        otherFriends.remove(userId);
     }
 
     public List<User> getCommonFriends(int userId, int otherUserId) {
-        if (!friendsList.containsKey(userId) || !friendsList.containsKey(otherUserId)) {
-            return new ArrayList<>();
+        final User user = userStorage.getUserById(userId);
+        final User friend = userStorage.getUserById(otherUserId);
+
+        if (user == null || friend == null) {
+            throw new UserNotFoundException("Пользователь не существует");
         }
 
-        return friendsList.get(userId).stream()
-                .filter(friendsList.get(otherUserId)::contains)
+        return user.getFriends().stream()
+                .filter(friend.getFriends()::contains)
                 .map(userStorage::getUserById)
                 .toList();
     }
@@ -87,16 +71,27 @@ public class UserService {
         final User user = userStorage.getUserById(userId);
 
         if (user == null) {
-            throw new FilmOrUserNotFoundException("Пользователь не существует");
+            throw new FilmNotFoundException("Пользователь не существует");
         }
 
-        if (!friendsList.containsKey(userId)) {
-            return new ArrayList<>();
-        }
-
-        return friendsList.get(userId).stream()
+        return user.getFriends().stream()
                 .map(userStorage::getUserById)
                 .toList();
     }
 
+    public User getUserById(int id) {
+        return userStorage.getUserById(id);
+    }
+
+    public User createUser(User user) {
+        return userStorage.createUser(user);
+    }
+
+    public User updateUser(User updatedUser) {
+        return userStorage.updateUser(updatedUser);
+    }
+
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
 }

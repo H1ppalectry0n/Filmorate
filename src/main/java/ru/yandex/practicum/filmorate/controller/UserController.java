@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,19 +20,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final InMemoryUserStorage userStorage;
     private final UserService userService;
 
     @PutMapping("/{id}/friends/{friendId}")
     public User addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.addFriend(id, friendId);
-        return userStorage.getUserById(id);
+        return userService.getUserById(id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public User removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.removeFriend(id, friendId);
-        return userStorage.getUserById(id);
+        return userService.getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
@@ -51,7 +49,7 @@ public class UserController {
         if (result.hasErrors()) {
             throw new ValidationException(collectValidationErrors(result));
         }
-        User createdUser = userStorage.createUser(user);
+        User createdUser = userService.createUser(user);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
@@ -61,7 +59,7 @@ public class UserController {
             throw new ValidationException(collectValidationErrors(result));
         }
 
-        User updated = userStorage.updateUser(updatedUser);
+        User updated = userService.updateUser(updatedUser);
         if (updated == null) {
             return new ResponseEntity<>(updatedUser, HttpStatus.NOT_FOUND);
         }
@@ -70,7 +68,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userStorage.getAllUsers());
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     private Map<String, String> collectValidationErrors(BindingResult result) {
@@ -79,6 +77,3 @@ public class UserController {
         return errors;
     }
 }
-
-
-
