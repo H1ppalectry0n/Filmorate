@@ -1,77 +1,84 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.services.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private final InMemoryUserStorage userStorage;
+    private final UserService userService;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
+        return userStorage.getUserById(id);
+    }
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private int userIdCounter = 1;
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.removeFriend(id, friendId);
+        return userStorage.getUserById(id);
+    }
 
-    // Create a new user
+    @GetMapping("/{id}/friends")
+    public List<User> friendsList(@PathVariable Integer id) {
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user, BindingResult result) {
         if (result.hasErrors()) {
-            logger.error("Validation failed for adding user: {}", result.getFieldErrors());
             throw new ValidationException(collectValidationErrors(result));
         }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(userIdCounter++);
-        users.put(user.getId(), user);
-        logger.info("User added successfully: {}", user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        User createdUser = userStorage.createUser(user);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    // Update an existing user
     @PutMapping
     public ResponseEntity<User> updateUser(@Valid @RequestBody User updatedUser, BindingResult result) {
         if (result.hasErrors()) {
-            logger.error("Validation failed for updating user: {}", result.getFieldErrors());
             throw new ValidationException(collectValidationErrors(result));
         }
 
-        if (updatedUser.getId() == null || !users.containsKey(updatedUser.getId())) {
-            logger.warn("User not found with ID: {}", updatedUser.getId());
-            return new ResponseEntity<User>(updatedUser, HttpStatus.NOT_FOUND);
+        User updated = userStorage.updateUser(updatedUser);
+        if (updated == null) {
+            return new ResponseEntity<>(updatedUser, HttpStatus.NOT_FOUND);
         }
-        if (updatedUser.getName() == null || updatedUser.getName().isEmpty()) {
-            updatedUser.setName(updatedUser.getLogin());
-        }
-        users.put(updatedUser.getId(), updatedUser);
-        logger.info("User updated successfully: {}", users.get(updatedUser.getId()));
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(updated);
     }
 
-    // Get all users
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        logger.info("Retrieving all users");
-        return ResponseEntity.ok(new ArrayList<>(users.values()));
+        return ResponseEntity.ok(userStorage.getAllUsers());
     }
 
-    // Helper method to collect validation errors
     private Map<String, String> collectValidationErrors(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
         result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return errors;
     }
 }
+
+
+
