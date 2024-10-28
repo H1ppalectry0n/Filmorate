@@ -30,12 +30,10 @@ public class UserService {
         // добавление идентификаторов для пользователя который подал заявку
         Set<Integer> userFriends = user.getFriends();
         userFriends.add(friendId);
-        user.setFriends(userFriends);
 
         // добавление идентификаторов для другого пользователя
         Set<Integer> otherFriends = friend.getFriends();
         otherFriends.add(userId);
-        friend.setFriends(otherFriends);
     }
 
     public void removeFriend(int userId, int friendId) {

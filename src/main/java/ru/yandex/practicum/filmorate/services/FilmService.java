@@ -32,7 +32,6 @@ public class FilmService {
 
         Set<Integer> likes = film.getFavorites();
         likes.add(userId);
-        film.setFavorites(likes);
     }
 
     public void removeLike(int filmId, int userId) {
