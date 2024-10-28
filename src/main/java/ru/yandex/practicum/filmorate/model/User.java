@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -26,4 +28,6 @@ public class User {
     @NotNull(message = "Birthday is required")
     @Past(message = "Birthday cannot be in the future")
     private LocalDate birthday;
+
+    private Set<Integer> friends = new HashSet<>();
 }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.validators.ReleaseDateConstraint;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -31,4 +33,6 @@ public class Film {
     @NotNull(message = "Duration is required")
     @Positive(message = "Duration must be positive")
     private Integer duration;
+
+    private Set<Integer> favorites = new HashSet<>();
 }
