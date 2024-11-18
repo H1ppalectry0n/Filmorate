@@ -35,4 +35,7 @@ public class Film {
     private Integer duration;
 
     private Set<Integer> favorites = new HashSet<>();
+
+    private Set<Genre> genres = new HashSet<>();
+    private MPARating rating;
 }
