@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class MPARating {
-    String rating;
+    private Integer id;
+    private String rating;
 }
