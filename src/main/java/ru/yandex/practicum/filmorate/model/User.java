@@ -13,7 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
-    private Integer id;
+    private Long id;
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email is required")
@@ -29,5 +29,5 @@ public class User {
     @Past(message = "Birthday cannot be in the future")
     private LocalDate birthday;
 
-    private Set<Integer> friends = new HashSet<>();
+    private Set<Long> friends = new HashSet<>();
 }

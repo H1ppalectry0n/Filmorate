@@ -23,13 +23,13 @@ public class FilmController {
     private final FilmService filmService;
 
     @PutMapping("/{id}/like/{userId}")
-    public ResponseEntity<Void> likeFilm(@PathVariable Integer id, @PathVariable Integer userId) {
+    public ResponseEntity<Void> likeFilm(@PathVariable Long id, @PathVariable Long userId) {
         filmService.addLike(id, userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public ResponseEntity<Void> removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public ResponseEntity<Void> removeLike(@PathVariable Long id, @PathVariable Long userId) {
 
         filmService.removeLike(id, userId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -65,6 +65,12 @@ public class FilmController {
     public ResponseEntity<List<Film>> getAllFilms() {
         return ResponseEntity.ok(filmService.getAllFilms());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Film> getFilmById(@PathVariable Long id) {
+        return ResponseEntity.ok(filmService.getFilmById(id));
+    }
+
 
     private Map<String, String> collectValidationErrors(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
