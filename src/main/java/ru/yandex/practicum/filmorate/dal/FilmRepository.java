@@ -13,17 +13,7 @@ import java.util.Optional;
 @Repository
 public class FilmRepository extends BaseRepository<Film> {
     // Общий шаблон для SELECT-запроса
-    private static final String BASE_QUERY = """
-                SELECT films.id, 
-                       films.name, 
-                       films.description, 
-                       films.releaseDate, 
-                       films.duration, 
-                       films.rating_id, 
-                       ratings.name AS rating_name
-                FROM films
-                JOIN ratings ON films.rating_id = ratings.id
-            """;
+    private static final String BASE_QUERY = "SELECT films.id, films.name, films.description, films.releaseDate, films.duration, films.rating_id, ratings.name AS rating_name FROM films JOIN ratings ON films.rating_id = ratings.id";
 
     // Полный запрос для получения всех фильмов
     private static final String FIND_ALL_QUERY = BASE_QUERY + ";";
@@ -49,12 +39,7 @@ public class FilmRepository extends BaseRepository<Film> {
     }
 
     public Film save(Film film) {
-        Long id = insert(INSERT_QUERY,
-                film.getName(),
-                film.getDescription(),
-                film.getReleaseDate(),
-                film.getDuration(),
-                film.getMpa().getId());
+        Long id = insert(INSERT_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
         film.setId(id);
 
         // Добавление в таблицу жанров
@@ -67,14 +52,7 @@ public class FilmRepository extends BaseRepository<Film> {
     }
 
     public Film update(Film film) {
-        update(
-                UPDATE_QUERY,
-                film.getName(),
-                film.getDescription(),
-                film.getReleaseDate(),
-                film.getDuration(),
-                film.getId()
-        );
+        update(UPDATE_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
         return film;
     }
 
