@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.GenreException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class GenreRepository extends BaseRepository<Genre> {
@@ -30,4 +31,15 @@ public class GenreRepository extends BaseRepository<Genre> {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }
 
+    public boolean checkGenresExist(Set<Genre> genres) {
+        List<Genre> existingGenres = findAll();
+
+        for (Genre genre : genres) {
+            if (!existingGenres.contains(genre)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

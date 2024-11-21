@@ -1,31 +1,31 @@
 -- Таблица для жанров
 CREATE TABLE IF NOT EXISTS genres (
     id BIGINT PRIMARY KEY AUTO_INCREMENT, -- Автогенерация ключа
-    name VARCHAR(200) NOT NULL
+    name VARCHAR(200)
 );
 
 -- Таблица для рейтингов
 CREATE TABLE IF NOT EXISTS ratings (
     id BIGINT PRIMARY KEY AUTO_INCREMENT, -- Автогенерация ключа
-    name VARCHAR(200) NOT NULL
+    name VARCHAR(200)
 );
 
 -- Таблица для пользователей
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT, -- Автогенерация ключа
-    email VARCHAR(200) NOT NULL UNIQUE CHECK (POSITION('@' IN email) > 1), -- Валидация email
-    login VARCHAR(200) NOT NULL CHECK (login NOT LIKE '% %'), -- Логин без пробелов
+    email VARCHAR(200), -- Валидация email
+    login VARCHAR(200), -- Логин без пробелов
     name VARCHAR(200), -- Имя может быть пустым
-    birthday DATE NOT NULL CHECK (birthday <= CURRENT_DATE) -- Дата рождения не в будущем
+    birthday DATE -- Дата рождения не в будущем
 );
 
 -- Таблица для фильмов
 CREATE TABLE IF NOT EXISTS films (
     id BIGINT PRIMARY KEY AUTO_INCREMENT, -- Автогенерация ключа
-    name VARCHAR(200) NOT NULL, -- Поле обязательно
-    description VARCHAR(200) CHECK (LENGTH(description) <= 200), -- Ограничение длины
-    releaseDate DATE NOT NULL CHECK (releaseDate >= '1895-12-28' AND releaseDate <= CURRENT_DATE), -- Проверка даты
-    duration INTEGER NOT NULL CHECK (duration > 0), -- Положительное значение
+    name VARCHAR(200), -- Поле обязательно
+    description VARCHAR(200), -- Ограничение длины
+    releaseDate DATE, -- Проверка даты
+    duration INTEGER, -- Положительное значение
     rating_id BIGINT,
     FOREIGN KEY (rating_id) REFERENCES ratings(id)
 );

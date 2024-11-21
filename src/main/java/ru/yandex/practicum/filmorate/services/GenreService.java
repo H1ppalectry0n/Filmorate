@@ -22,15 +22,7 @@ public class GenreService {
     }
 
     public boolean checkGenresExist(Set<Genre> genres) {
-        List<Genre> existingGenres = genreRepository.findAll();
-
-        for (Genre genre : genres) {
-            if (!existingGenres.contains(genre)) {
-                return false;
-            }
-        }
-
-        return true;
+        return genreRepository.checkGenresExist(genres);
     }
 
     public List<Genre> findByFilmId(Long filmId) {

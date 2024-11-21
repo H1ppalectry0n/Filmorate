@@ -12,8 +12,25 @@ import java.util.Optional;
 
 @Repository
 public class FilmRepository extends BaseRepository<Film> {
-    private static final String FIND_ALL_QUERY = "SELECT films.id, films.name, films.description, films.releaseDate, films.duration, films.rating_id, ratings.name AS rating_name FROM films JOIN ratings ON films.rating_id = ratings.id;";
-    private static final String FIND_BY_ID = "SELECT films.id, films.name, films.description, films.releaseDate, films.duration, films.rating_id, ratings.name AS rating_name FROM films JOIN ratings ON films.rating_id = ratings.id WHERE films.id = ?;";
+    // Общий шаблон для SELECT-запроса
+    private static final String BASE_QUERY = """
+                SELECT films.id, 
+                       films.name, 
+                       films.description, 
+                       films.releaseDate, 
+                       films.duration, 
+                       films.rating_id, 
+                       ratings.name AS rating_name
+                FROM films
+                JOIN ratings ON films.rating_id = ratings.id
+            """;
+
+    // Полный запрос для получения всех фильмов
+    private static final String FIND_ALL_QUERY = BASE_QUERY + ";";
+
+    // Полный запрос для поиска фильма по ID
+    private static final String FIND_BY_ID_QUERY = BASE_QUERY + " WHERE films.id = ?;";
+
     private static final String INSERT_QUERY = "INSERT INTO films (name, description, releaseDate, duration, rating_id) VALUES (?, ?, ?, ?, ?);";
     private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ? WHERE id = ?;";
     private static final String ADD_FAVORITE_QUERY = "INSERT INTO films_favorites (film_id, user_id) VALUES (?, ?);";
@@ -28,7 +45,7 @@ public class FilmRepository extends BaseRepository<Film> {
     }
 
     public Optional<Film> findById(Long id) {
-        return findOne(FIND_BY_ID, id);
+        return findOne(FIND_BY_ID_QUERY, id);
     }
 
     public Film save(Film film) {

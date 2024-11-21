@@ -44,15 +44,7 @@ public class BaseRepository<T> {
     }
 
     protected long insert(String query, Object... params) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            for (int idx = 0; idx < params.length; idx++) {
-                ps.setObject(idx + 1, params[idx]);
-            }
-            return ps;
-        }, keyHolder);
+        GeneratedKeyHolder keyHolder = insertAndReturnKeys(query, params);
 
         Long id = keyHolder.getKeyAs(Long.class);
 
@@ -65,6 +57,17 @@ public class BaseRepository<T> {
     }
 
     protected void insertMtM(String query, Object... params) {
+        GeneratedKeyHolder keyHolder = insertAndReturnKeys(query, params);
+
+        Map<String, Object> id = keyHolder.getKeys();
+
+        // Возвращаем id нового пользователя
+        if (id == null || id.size() != 2) {
+            throw new InternalServerException("Не удалось сохранить данные");
+        }
+    }
+
+    protected GeneratedKeyHolder insertAndReturnKeys(String query, Object... params) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection
@@ -75,12 +78,6 @@ public class BaseRepository<T> {
             return ps;
         }, keyHolder);
 
-        Map<String, Object> id = keyHolder.getKeys();
-
-        // Возвращаем id нового пользователя
-        if (id == null || id.size() != 2) {
-            throw new InternalServerException("Не удалось сохранить данные");
-        }
+        return keyHolder;
     }
-
 }
