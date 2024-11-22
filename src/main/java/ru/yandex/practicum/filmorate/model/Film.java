@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.validators.ReleaseDateConstraint;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,7 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Film {
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Name is required")
     private String name;
@@ -34,8 +36,11 @@ public class Film {
     @Positive(message = "Duration must be positive")
     private Integer duration;
 
-    private Set<Integer> favorites = new HashSet<>();
+    @NotNull(message = "MPA is required")
+    private MPARating mpa;
 
-    private Set<Genre> genres = new HashSet<>();
-    private MPARating rating;
+    private List<Genre> genres = new ArrayList<>();
+
+    private Set<Long> favorites = new HashSet<>();
+
 }

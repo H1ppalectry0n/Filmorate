@@ -2,94 +2,69 @@ package ru.yandex.practicum.filmorate.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final InMemoryUserStorage userStorage;
+    private final UserRepository userRepository;
 
-    public void addFriend(int userId, int friendId) {
-        final User user = userStorage.getUserById(userId);
-        final User friend = userStorage.getUserById(friendId);
-
-        if (user == null || friend == null) {
+    public void addFriend(Long userId, Long friendId) {
+        if (userRepository.findById(userId).isEmpty() ||
+                userRepository.findById(friendId).isEmpty()) {
             throw new UserNotFoundException("Пользователь не существует");
         }
 
-        if (userId == friendId) {
-            throw new FilmNotFoundException("нельзя добавить в друзья самого себя");
-        }
-
-        // добавление идентификаторов для пользователя который подал заявку
-        Set<Integer> userFriends = user.getFriends();
-        userFriends.add(friendId);
-
-        // добавление идентификаторов для другого пользователя
-        Set<Integer> otherFriends = friend.getFriends();
-        otherFriends.add(userId);
+        userRepository.addFriend(userId, friendId);
     }
 
-    public void removeFriend(int userId, int friendId) {
-        final User user = userStorage.getUserById(userId);
-        final User friend = userStorage.getUserById(friendId);
-
-        if (user == null || friend == null) {
+    public void removeFriend(Long userId, Long friendId) {
+        if (userRepository.findById(userId).isEmpty() ||
+                userRepository.findById(friendId).isEmpty()) {
             throw new UserNotFoundException("Пользователь не существует");
         }
 
-        Set<Integer> userFriends = user.getFriends();
-        userFriends.remove(friendId);
-
-        Set<Integer> otherFriends = friend.getFriends();
-        otherFriends.remove(userId);
+        userRepository.removeFriend(userId, friendId);
     }
 
-    public List<User> getCommonFriends(int userId, int otherUserId) {
-        final User user = userStorage.getUserById(userId);
-        final User friend = userStorage.getUserById(otherUserId);
-
-        if (user == null || friend == null) {
+    public List<User> getCommonFriends(Long userId, Long otherUserId) {
+        if (userRepository.findById(userId).isEmpty() ||
+                userRepository.findById(otherUserId).isEmpty()) {
             throw new UserNotFoundException("Пользователь не существует");
         }
 
-        return user.getFriends().stream()
-                .filter(friend.getFriends()::contains)
-                .map(userStorage::getUserById)
-                .toList();
+        return userRepository.getCommonFriends(userId, otherUserId);
     }
 
-    public List<User> getUserFriends(int userId) {
-        final User user = userStorage.getUserById(userId);
-
-        if (user == null) {
-            throw new FilmNotFoundException("Пользователь не существует");
-        }
-
-        return user.getFriends().stream()
-                .map(userStorage::getUserById)
-                .toList();
-    }
-
-    public User getUserById(int id) {
-        return userStorage.getUserById(id);
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Пользователь с id " + id + " не найден"));
     }
 
     public User createUser(User user) {
-        return userStorage.createUser(user);
+        return userRepository.save(user);
     }
 
     public User updateUser(User updatedUser) {
-        return userStorage.updateUser(updatedUser);
+        if (userRepository.findById(updatedUser.getId()).isEmpty()) {
+            throw new UserNotFoundException("Пользователь не существует");
+        }
+
+        return userRepository.update(updatedUser);
     }
 
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userRepository.findAll();
+    }
+
+    public List<User> getUserFriends(Long id) {
+        if (userRepository.findById(id).isEmpty()) {
+            throw new UserNotFoundException("Пользователь не существует");
+        }
+
+        return userRepository.findFriends(id);
     }
 }

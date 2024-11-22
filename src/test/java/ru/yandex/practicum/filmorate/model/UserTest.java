@@ -23,7 +23,7 @@ class UserTest {
 
     @Test
     public void shouldPassValidationWithValidUser() {
-        User user = new User(1, "valid.email@example.com", "validLogin", "Valid Name",
+        User user = new User(1L, "valid.email@example.com", "validLogin", "Valid Name",
                 LocalDate.of(2000, 1, 1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -32,7 +32,7 @@ class UserTest {
 
     @Test
     public void shouldFailValidationWhenEmailIsInvalid() {
-        User user = new User(1, "invalid-email", "validLogin", "Valid Name",
+        User user = new User(1L, "invalid-email", "validLogin", "Valid Name",
                 LocalDate.of(2000, 1, 1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -42,7 +42,7 @@ class UserTest {
 
     @Test
     public void shouldFailValidationWhenEmailIsBlank() {
-        User user = new User(1, "", "validLogin", "Valid Name",
+        User user = new User(1L, "", "validLogin", "Valid Name",
                 LocalDate.of(2000, 1, 1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -52,7 +52,7 @@ class UserTest {
 
     @Test
     public void shouldFailValidationWhenLoginIsBlank() {
-        User user = new User(1, "valid.email@example.com", "", "Valid Name",
+        User user = new User(1L, "valid.email@example.com", "", "Valid Name",
                 LocalDate.of(2000, 1, 1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -62,7 +62,7 @@ class UserTest {
 
     @Test
     public void shouldFailValidationWhenLoginContainsSpaces() {
-        User user = new User(1, "valid.email@example.com", "invalid login", "Valid Name",
+        User user = new User(1L, "valid.email@example.com", "invalid login", "Valid Name",
                 LocalDate.of(2000, 1, 1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -72,7 +72,7 @@ class UserTest {
 
     @Test
     public void shouldPassValidationWhenNameIsNull() {
-        User user = new User(1, "valid.email@example.com", "validLogin", null,
+        User user = new User(1L, "valid.email@example.com", "validLogin", null,
                 LocalDate.of(2000, 1, 1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -81,7 +81,7 @@ class UserTest {
 
     @Test
     public void shouldFailValidationWhenBirthdayIsInFuture() {
-        User user = new User(1, "valid.email@example.com", "validLogin", "Valid Name",
+        User user = new User(1L, "valid.email@example.com", "validLogin", "Valid Name",
                 LocalDate.now().plusDays(1), null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -91,7 +91,7 @@ class UserTest {
 
     @Test
     public void shouldFailValidationWhenBirthdayIsNull() {
-        User user = new User(1, "valid.email@example.com", "validLogin", "Valid Name",
+        User user = new User(1L, "valid.email@example.com", "validLogin", "Valid Name",
                 null, null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);

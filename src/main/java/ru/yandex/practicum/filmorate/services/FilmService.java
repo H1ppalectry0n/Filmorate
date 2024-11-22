@@ -2,70 +2,79 @@ package ru.yandex.practicum.filmorate.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.GenreValidationException;
+import ru.yandex.practicum.filmorate.exceptions.RatingValidationException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    private final InMemoryFilmStorage filmStorage;
-    private final InMemoryUserStorage userStorage;
+    private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
+    private final RatingService ratingService;
+    private final GenreService genreService;
 
-    public void addLike(int filmId, int userId) {
-        final Film film = filmStorage.getFilmById(filmId);
-        final User user = userStorage.getUserById(userId);
-
-        if (film == null) {
+    public void addLike(Long filmId, Long userId) {
+        if (filmRepository.findById(filmId).isEmpty()) {
             throw new FilmNotFoundException("Фильм не существует");
         }
-
-        if (user == null) {
+        if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("Пользователь не существует");
         }
-
-        Set<Integer> likes = film.getFavorites();
-        likes.add(userId);
+        filmRepository.addFavorite(filmId, userId);
     }
 
-    public void removeLike(int filmId, int userId) {
-        final Film film = filmStorage.getFilmById(filmId);
-        final User user = userStorage.getUserById(userId);
-
-        if (film == null) {
+    public void removeLike(Long filmId, Long userId) {
+        if (filmRepository.findById(filmId).isEmpty()) {
             throw new FilmNotFoundException("Фильм не существует");
         }
-
-        if (user == null) {
+        if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException("Пользователь не существует");
         }
-
-        Set<Integer> likes = film.getFavorites();
-        likes.remove(userId);
+        filmRepository.removeFavorite(filmId, userId);
     }
 
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getAllFilms().stream()
+        return filmRepository.findAll().stream()
+                .peek(film -> film.setFavorites(userRepository.getUserFavoriteFilmByFilmId(film.getId())))
                 .sorted((film, other) -> Integer.compare(other.getFavorites().size(), film.getFavorites().size()))
                 .limit(count)
                 .toList();
     }
 
     public Film addFilm(Film film) {
-        return filmStorage.addFilm(film);
+        if (!genreService.checkGenresExist(new HashSet<>(film.getGenres()))) {
+            throw new GenreValidationException("Genres fail");
+        }
+
+        if (!ratingService.checkRating(film.getMpa().getId())) {
+            throw new RatingValidationException("Rating fail");
+        }
+
+        return filmRepository.save(film);
     }
 
     public Film updateFilm(Film updatedFilm) {
-        return filmStorage.updateFilm(updatedFilm);
+        if (filmRepository.findById(updatedFilm.getId()).isEmpty()) {
+            throw new FilmNotFoundException("Фильм не существует");
+        }
+        return filmRepository.update(updatedFilm);
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmRepository.findAll();
+    }
+
+    public Film getFilmById(Long id) {
+        Film film = filmRepository.findById(id).orElseThrow(() -> new FilmNotFoundException("Фильм не существует"));
+        film.setGenres(genreService.findByFilmId(film.getId()));
+        return film;
     }
 }

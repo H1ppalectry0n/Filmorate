@@ -23,8 +23,8 @@ class FilmTest {
 
     @Test
     public void shouldPassValidationWithValidFilm() {
-        Film film = new Film(1, "Valid Name", "Valid Description",
-                LocalDate.of(2000, 1, 1), 120, null);
+        Film film = new Film(1L, "Valid Name", "Valid Description",
+                LocalDate.of(2000, 1, 1), 120, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(0, violations.size(), "Expected no validation errors.");
@@ -32,8 +32,8 @@ class FilmTest {
 
     @Test
     public void shouldFailValidationWhenNameIsBlank() {
-        Film film = new Film(1, "", "Valid Description",
-                LocalDate.of(2000, 1, 1), 120, null);
+        Film film = new Film(1L, "", "Valid Description",
+                LocalDate.of(2000, 1, 1), 120, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size());
@@ -43,8 +43,8 @@ class FilmTest {
     @Test
     public void shouldFailValidationWhenDescriptionExceedsMaxLength() {
         String longDescription = "A".repeat(201); // Строка длиной 201 символ
-        Film film = new Film(1, "Valid Name", longDescription,
-                LocalDate.of(2000, 1, 1), 120, null);
+        Film film = new Film(1L, "Valid Name", longDescription,
+                LocalDate.of(2000, 1, 1), 120, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size());
@@ -53,8 +53,8 @@ class FilmTest {
 
     @Test
     public void shouldFailValidationWhenReleaseDateIsInFuture() {
-        Film film = new Film(1, "Valid Name", "Valid Description",
-                LocalDate.now().plusDays(1), 120, null);
+        Film film = new Film(1L, "Valid Name", "Valid Description",
+                LocalDate.now().plusDays(1), 120, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size());
@@ -63,8 +63,8 @@ class FilmTest {
 
     @Test
     public void shouldFailValidationWhenReleaseDateIsTooEarly() {
-        Film film = new Film(1, "Valid Name", "Valid Description",
-                LocalDate.of(1800, 1, 1), 120, null);
+        Film film = new Film(1L, "Valid Name", "Valid Description",
+                LocalDate.of(1800, 1, 1), 120, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size());
@@ -74,8 +74,8 @@ class FilmTest {
 
     @Test
     public void shouldFailValidationWhenDurationIsNotPositive() {
-        Film film = new Film(1, "Valid Name", "Valid Description",
-                LocalDate.of(2000, 1, 1), -120, null);
+        Film film = new Film(1L, "Valid Name", "Valid Description",
+                LocalDate.of(2000, 1, 1), -120, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size());
@@ -84,8 +84,8 @@ class FilmTest {
 
     @Test
     public void shouldFailValidationWhenDurationIsNull() {
-        Film film = new Film(1, "Valid Name", "Valid Description",
-                LocalDate.of(2000, 1, 1), null, null);
+        Film film = new Film(1L, "Valid Name", "Valid Description",
+                LocalDate.of(2000, 1, 1), null, new MPARating(), null, null);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size());
